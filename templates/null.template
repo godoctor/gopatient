@@ -1,0 +1,12 @@
+	@echo ""
+	@echo "********** TEST #!NUM! -- !PKG! **********"
+	@echo ""
+	@echo "Installing before refactoring..."
+	go install !PKG!
+	@echo "Refactoring..."
+	go-doctor -d -pos !POS! !FILE! null false >patch.txt
+	@echo "Applying patch..."
+	patch -p0 -i patch.txt
+	@echo "Installing after refactoring..."
+	go install !PKG!
+	#patch -p0 -R -i patch.txt

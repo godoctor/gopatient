@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "-help" ] || [ "$1" == "--help" ]; then
+	echo "Usage: $0"
+	echo 'Runs "go install" on all packages on the GOPATH containing *.go'
+	echo 'file with "package main", listing the ones for which it succeeds'
+	exit 0
+fi
+
+FINDER=`dirname $0`/gopatient-helper-find-runnable
+for file in `$FINDER`; do
+
+	# If GOPATH is /gocode (length 7), trim /gocode/src/ (length 7+5) from
+	# the start of each path
+	package=`dirname $file | cut -c $((${#GOPATH}+6))- `
+
+	go install "$package" >&2
+	if [ $? -eq 0 ]; then
+		echo "$package"
+	fi
+done
+
+exit 0

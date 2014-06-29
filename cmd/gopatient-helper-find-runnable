@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "-help" ] || [ "$1" == "--help" ]; then
+	echo "Usage: $0"
+	echo "Lists all *.go files on the GOPATH containing 'package main"
+	exit 0
+fi
+
+if [ "$GOPATH" == "" ]; then
+	echo "GOPATH not set"
+	exit 1
+fi
+
+grep 'func main()' -l -R "$GOPATH" --include '*.go'
+exit $?

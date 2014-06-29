@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "-help" ] || [ "$1" == "--help" ]; then
+	echo "Usage: $0"
+	echo "Lists all packages on the GOPATH that contain *_test.go files"
+	exit 0
+fi
+
+if [ "$GOPATH" == "" ]; then
+	echo "GOPATH not set"
+	exit 1
+fi
+
+# If GOPATH is /gocode (length 7), trim /gocode/src/ (length 7+5) from the
+# start of each path
+find "$GOPATH" -iname '*_test.go' -exec dirname {} ';' \
+	| cut -c $((${#GOPATH}+6))- \
+	| sort | uniq
+exit $?

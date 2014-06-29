@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "-help" ] || [ "$1" == "--help" ]; then
+	echo "Usage: $0"
+	echo 'Runs "go test" on all packages on the GOPATH containing *_test.go'
+	echo 'files, and lists the ones for which "go test" succeeds'
+	exit 0
+fi
+
+FINDER=`dirname $0`/gopatient-helper-find-testable
+for package in `$FINDER`; do
+	go test "$package" >&2
+	if [ $? -eq 0 ]; then
+		echo "$package"
+	fi
+done
+exit 0

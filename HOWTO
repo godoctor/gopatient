@@ -1,0 +1,87 @@
+=============================================================================
+Setup -- DO THIS BEFORE DOING EITHER OF THE TASKS BELOW
+=============================================================================
+
+$ go install golang-refactoring.org/src/go-patient/cmd/gopatient-helper-download
+$ go install golang-refactoring.org/src/go-patient/cmd/gopatient-plan
+$ export PATH=$PATH:$GOPATH/src/golang-refactoring.org/go-patient/cmd:$GOPATH/bin
+
+=============================================================================
+Creating a Test Code Workspace
+=============================================================================
+
+1. Clone the top 100 GitHub repositories that use Go (and their dependencies)
+
+   $ mkdir ~/testcode
+   $ cd ~/testcode
+   $ GOPATH=~/testcode gopatient-helper-download -n 100
+
+2. Determine which packages are actually installable on your system, and save
+   the list to "runnable.txt"
+
+   $ cd ~/testcode
+   $ GOPATH=~/testcode gopatient-helper-check-runnable >runnable.txt 2>/dev/null
+
+   BE PATIENT.  There will be no output, and this will take several minutes.
+   In another terminal, you can "tail -f ~/testcode/runnable.txt" to see
+   new lines as they are added to runnable.txt.
+
+   After execution completes, look at the file runnable.txt.  This is the list
+   of packages that built successfully, which you can use for testing.
+
+=============================================================================
+Creating a Test Plan
+=============================================================================
+
+1. Select a Makefile template.
+
+   There is an example template file in
+                 /path/to/go-patient/templates/null.template
+   that you can use directly to test the null refactoring.  Or, you can copy it
+   and create your own template.
+
+2. Generate a test plan from "my.template" for packages in "runnable.txt"
+
+   $ cd ~/testcode
+   $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 1000 -template $GOPATH/src/golang-refactoring.org/go-patient/templates/null.template
+
+   If you get the error
+      Error parsing github.com/coreos/etcd/go_version.go:3:1: expected 'package', found 'STRING' "etcd requires go 1.2 or greater to build"
+   you can simply delete that file.
+
+=============================================================================
+Running a Test Plan
+=============================================================================
+
+1. Run the test plan (skipping tests that already succeeded)
+
+   $ cd ~/testcode
+   $ GOPATH=~/testcode make
+
+   The first time you run make, your entire ~/testcode/src directory will be
+   backed up to ~/testcode/.patient-backup/src, so that the original code can
+   be restored at any point.  This may take a couple of minutes; you'll see
+   each filename displayed as it is backed up.  Then, the tests will begin
+   running.
+
+   Each test is given a number.  You can view the Makefile to see exactly
+   what that test is doing.  If a test (say, number 23) succeeds, a file
+   named 23.success will be created; that test will not be run again as long
+   as 23.success exists on disk.  If a test fails, make will stop, so you can
+   decide how to deal with the error.
+
+   Usually, you need to fix your refactoring, but sometimes you might want to
+   just skip that test and move on.  To do that:
+
+2. Mark test 23 as passing so you can skip it for now
+
+   (Occasionally you will get "ERROR: The selected file ... was not found in
+   the provided scope: ...", which the go/loader omits some files.  These are
+   probably safe to skip for now.)
+
+   $ cd ~/testcode
+   $ touch 23.{failed,success}
+
+3. Remove all *.success files so all tests will be re-run next time
+
+   $ GOPATH=~/testcode make clean
