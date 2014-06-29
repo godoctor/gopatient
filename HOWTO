@@ -1,14 +1,43 @@
+
+
+                     gopatient: Tools to test the Go Doctor
+
+                                     HOWTO
+
+
 =============================================================================
 Setup -- DO THIS BEFORE DOING EITHER OF THE TASKS BELOW
 =============================================================================
+
+Before you can perform any of the tasks below, you'll need to make sure all
+of the commands in the go-patient/cmd directory are available on your PATH.
 
 $ go install golang-refactoring.org/src/go-patient/cmd/gopatient-helper-download
 $ go install golang-refactoring.org/src/go-patient/cmd/gopatient-plan
 $ export PATH=$PATH:$GOPATH/src/golang-refactoring.org/go-patient/cmd:$GOPATH/bin
 
+Note that "export PATH=only changes your PATH until you close your terminal;
+you'll need to run that command again if you open a new terminal.  Or, edit
+your ~/.bashrc (or similar) to permanently modify your PATH.
+
 =============================================================================
 Creating a Test Code Workspace
 =============================================================================
+
+You should create a separate workspace for testing (we'll use the directory
+~/testcode).  Do NOT use your usual Go workspace.  The tester will freely add,
+delete, and modify files in this workspace, so it's assumed that you don't have
+anything too important there.
+
+Like any Go workspace, your test workspace should have the form
+    ~/testcode
+        bin
+        pkg
+        src
+
+You can put anything you want in your testing workspace.  One option is to
+clone the top GitHub repositories that use Go and try to use those projects.
+You can do that as follows:
 
 1. Clone the top 100 GitHub repositories that use Go (and their dependencies)
 
@@ -16,18 +45,100 @@ Creating a Test Code Workspace
    $ cd ~/testcode
    $ GOPATH=~/testcode gopatient-helper-download -n 100
 
+Note that this will "go get" dependencies as well, so your workspace will
+include some packages that are not from github.com.
+
+There's some outdated stuff on GitHub, so don't expect every project to build
+and run successfully.  The Go Patient includes a couple of scripts that will
+try to "go build" or "go test" the packages in your workspace, to see which
+ones are actually successful.
+
 2. Determine which packages are actually installable on your system, and save
    the list to "runnable.txt"
 
    $ cd ~/testcode
    $ GOPATH=~/testcode gopatient-helper-check-runnable >runnable.txt 2>/dev/null
 
-   BE PATIENT.  There will be no output, and this will take several minutes.
-   In another terminal, you can "tail -f ~/testcode/runnable.txt" to see
-   new lines as they are added to runnable.txt.
+BE PATIENT.  There will be no output, and this will take several minutes.  In
+another terminal, you can "tail -f ~/testcode/runnable.txt" to see new lines as
+they are added to runnable.txt.
 
-   After execution completes, look at the file runnable.txt.  This is the list
-   of packages that built successfully, which you can use for testing.
+Or if you omit "2>/dev/null", you can see all of the errors as it attempts to
+build each project.
+
+After execution completes, look at the file runnable.txt.  This is the list of
+packages that built successfully, which you can try to use for testing.
+
+=============================================================================
+Overview of the Testing Process
+=============================================================================
+
+Now that you have a testing workspace set up in ~/testcode, you can begin
+testing.  Here's how the testing process works.
+
+  *** You will run the "test planner," which will generate a Makefile.
+
+You need to decide how many tests you want to run.  Let's say 50.
+
+You also need to decide what kind of selections you want to test on.  For
+example, Rename needs identifiers.  Replace Short Assignment needs ":="
+assignments.  Add Godoc Comment needs entire files.  For now, let's say
+you want to select identifiers.
+
+The test planner will read a list of packages from a text file.  Since you
+want to select identifiers, it will scan all of the source code in those
+packages, and collect all of the identifiers.  Then, it will (pseudo)randomly
+choose 50 identifiers to test on.
+
+Remember the file "runnable.txt" that you created above, which lists all of the
+packages that built successfully?  We'll use that for the list of packages.
+
+The other important input to the test planner is a template.
+
+  *** You will give the "test planner" a template that tells it what commands
+  *** to execute to run a particular test.
+
+The test planner will generate a Makefile with one target for each test.  The
+template tells the planner what to insert into the Makefile to actually run
+the test.  The template can include !NUM!, !PKG!, !FILE!, and !POS!, which will
+be replaced with the test number, Go package being tested, the file being
+tested, and the selected text region (in the Go Doctor's line/column format
+"1,2:3,4").  An example template is provided in templates/null.go; it is a
+template for testing the Null Refactoring (which doesn't change any source
+code), and it looks something like this:
+
+	@echo ""
+	@echo "Running test #!NUM! on the Go package !PKG!
+	@echo ""
+	@echo "Installing before refactoring..."
+	go install !PKG!
+	@echo "Refactoring..."
+	go-doctor -d -pos !POS! !FILE! null false >patch.txt
+	@echo "Applying patch..."
+	patch -p0 -i patch.txt
+	@echo "Installing after refactoring..."
+	go install !PKG!
+
+After the test planner generates a Makefile, you are ready to test.
+
+  *** You will run the generated Makefile to test the code.
+
+The first time you run "make," it will back up all of the code in your test
+workspace to a directory called .patient-backup.  This may take a few minutes.
+
+To run each test, "make" will:
+   1. Delete all of the code in bin/ and pkg/ and restore the original code
+      in src/ from the .patient-backup.  This ensures that you're refactoring
+      "fresh" code and not some leftovers from a failed test.
+   2. Run whatever commands were given in the template file.
+   3. Create a *.success file to mark the test as having passed.
+
+When a test succeeds, a *.success file will be written to disk, and that test
+won't be run again.  When a test fails, "make" will exit so you can fix the
+test.  Then, when you run "make" next time, it will try the failed test again
+and move on.
+
+Now for the details...
 
 =============================================================================
 Creating a Test Plan
@@ -40,7 +151,7 @@ Creating a Test Plan
    that you can use directly to test the null refactoring.  Or, you can copy it
    and create your own template.
 
-2. Generate a test plan from "my.template" for packages in "runnable.txt"
+2. Generate a Makefile from "my.template" for packages in "runnable.txt"
 
    $ cd ~/testcode
    $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 1000 -template $GOPATH/src/golang-refactoring.org/go-patient/templates/null.template
@@ -85,3 +196,25 @@ Running a Test Plan
 3. Remove all *.success files so all tests will be re-run next time
 
    $ GOPATH=~/testcode make clean
+
+=============================================================================
+Additional Notes
+=============================================================================
+
+Don't be afraid to look at the generated Makefile to see what "make" is
+actually doing.
+
+For that matter, all of these utilies are relatively simple.  Don't be afraid
+to look at ther source code.
+
+The gopatient-helper-download and gopatient-plan binaries have usage
+information; just run them, and they will provide a list of all of the options
+that can be provided on the command line.
+
+Also, gopatient-plan's random number generator uses a seed of 0 by default,
+every time.  So, if your workspace code doesn't change and runnable.txt doesn't
+change, it will always generate the same test plan.  You can give it a
+different seed when you're ready to try a different set of tests; run
+"gopatient-plan" to see usage information, which describes how to do this.
+
+--Jeff Overbey 6/29/2014

@@ -21,8 +21,7 @@ import (
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `Usage: gopatient-plan -pkglist file -find {files|idents} [-limit n] [-seed n] [-csv file] -template file
-Creates a test plan, saving a lists of tests to a CSV (comma-separated values)
-file (default: tests.csv), as well as a Makefile to run the tests
+Generates a Makefile for testing, optionally a the list of tests to a CSV file
 
 The template file will be substituted into the body of each rule in the
 Makefile.  The following can be used in the template:

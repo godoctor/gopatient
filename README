@@ -1,13 +1,20 @@
 
 
-                    gopatient: A tool to test the Go Doctor
+                     gopatient: Tools to test the Go Doctor
 
 
-gopatient-helper-download       "go get" the top 500 GitHub projects using Go
+    This repository contains a combination of shell scripts and small Go
+    tools used to test the Go Doctor:
 
+
+gopatient-helper-download       "go get" the top GitHub projects using Go
+
+gopatient-helper-find-runnable  List packages containing "func main()"
+gopatient-helper-check-runnable <- or only those on which "go install" succeeds
 gopatient-helper-find-testable  List all packages containing *_test.go files
 gopatient-helper-check-testable <- or only those on which "go test" succeeds
-gopatient-helper-find-runnable  List packages containing func main()
-gopatient-helper-check-runnable <- or only those on which "go install" succeeds
 
-gopatient-plan                  Generate a Makefile
+gopatient-plan                  Generate a Makefile for testing a refactoring
+
+
+    See HOWTO for how to use these tools in a typical testing scenario.
