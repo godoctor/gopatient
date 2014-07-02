@@ -281,7 +281,7 @@ prepare: .patient-backup/ok
 		fmt.Fprintf(out, "\n%s.success: .patient-backup/ok\n", num)
 		fmt.Fprintf(out, `
 	@if [ ! -d .patient-backup/src ]; then echo ".patient-backup/src does not exist; cannot restore"; exit 1; fi
-	rsync -av --delete .patient-backup/{bin,pkg,src} .
+	rsync -av --delete .patient-backup/bin .patient-backup/pkg .patient-backup/src .
 `)
 
 		for _, line := range template {
