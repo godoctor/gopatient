@@ -20,7 +20,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintln(os.Stderr, `Usage: gopatient-plan -pkglist file -find {files|idents} [-limit n] [-seed n] [-csv file] -template file
+	fmt.Fprintln(os.Stderr, `Usage: gopatient-plan -pkglist file -find {files|idents|toplevel|exprs} [-limit n] [-seed n] [-csv file] -template file
 Generates a Makefile for testing, optionally a the list of tests to a CSV file
 
 The template file will be substituted into the body of each rule in the
@@ -43,7 +43,7 @@ var (
 	pkgsFlag = flag.String("pkglist", "",
 		"Text file containing a list of go packages, one per line")
 	findFlag = flag.String("find", "idents",
-		"What to find: files or idents (default: files)")
+		"What to find: files, idents, toplevel, exprs (default: files)")
 	limitFlag = flag.Int("limit", 50,
 		"Number of tests to generate (default: 50)")
 	seedFlag = flag.Int64("seed", 0,
@@ -127,6 +127,10 @@ func finder(typ string) (func(*token.FileSet, *ast.File) []string, error) {
 		return fileFinder, nil
 	case "idents":
 		return identFinder, nil
+	case "toplevel":
+		return topLevelDeclFinder, nil
+	case "exprs":
+		return exprFinder, nil
 	default:
 		return func(*token.FileSet, *ast.File) []string {
 				return []string{}
@@ -325,14 +329,43 @@ func identFinder(fset *token.FileSet, file *ast.File) []string {
 	ast.Inspect(file, func(n ast.Node) bool {
 		switch id := n.(type) {
 		case *ast.Ident:
-			fromLine := fset.Position(id.Pos()).Line
-			fromCol := fset.Position(id.Pos()).Column
-			toLine := fset.Position(id.End()).Line
-			toCol := fset.Position(id.End()).Column
-			result = append(result, fmt.Sprintf("%d,%d:%d,%d",
-				fromLine, fromCol, toLine, toCol))
+			result = append(result, posString(fset, id))
 		}
 		return true
 	})
 	return result
+}
+
+func topLevelDeclFinder(fset *token.FileSet, file *ast.File) []string {
+	result := []string{}
+	for _, decl := range file.Decls {
+		result = append(result, posString(fset, decl))
+		if gen, ok := decl.(*ast.GenDecl); ok {
+			for _, spec := range gen.Specs {
+				result = append(result, posString(fset, spec))
+			}
+		}
+	}
+	return result
+}
+
+func exprFinder(fset *token.FileSet, file *ast.File) []string {
+	result := []string{}
+	ast.Inspect(file, func(n ast.Node) bool {
+		switch id := n.(type) {
+		case ast.Expr:
+			result = append(result, posString(fset, id))
+		}
+		return true
+	})
+	return result
+}
+
+func posString(fset *token.FileSet, node ast.Node) string {
+	fromLine := fset.Position(node.Pos()).Line
+	fromCol := fset.Position(node.Pos()).Column
+	toLine := fset.Position(node.End()).Line
+	toCol := fset.Position(node.End()).Column
+	return fmt.Sprintf("%d,%d:%d,%d",
+		fromLine, fromCol, toLine, toCol)
 }
