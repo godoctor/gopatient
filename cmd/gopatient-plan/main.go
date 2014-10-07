@@ -329,7 +329,12 @@ func identFinder(fset *token.FileSet, file *ast.File) []string {
 	ast.Inspect(file, func(n ast.Node) bool {
 		switch id := n.(type) {
 		case *ast.Ident:
-			result = append(result, posString(fset, id))
+			fromLine := fset.Position(id.Pos()).Line
+			fromCol := fset.Position(id.Pos()).Column
+			toLine := fset.Position(id.End()-1).Line
+			toCol := fset.Position(id.End()-1).Column
+			result = append(result, fmt.Sprintf("%d,%d:%d,%d",
+				fromLine, fromCol, toLine, toCol))
 		}
 		return true
 	})

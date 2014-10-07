@@ -4,8 +4,8 @@
 	@echo "Installing before refactoring..."
 	go install !PKG!
 	@echo "Refactoring..."
-	godoctor -pos !POS! -file !FILE! null false >patch.txt
+	godoctor -pos !POS! -file !FILE! rename Some_New_Var >patch.txt
 	@echo "Applying patch..."
-	patch -p0 -i patch.txt
+	patch -p0 -d/ -i `pwd`/patch.txt
 	@echo "Installing after refactoring..."
 	go install !PKG!
