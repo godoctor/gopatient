@@ -14,9 +14,9 @@ of the commands in the go-patient/cmd directory are available on your PATH.
 
 $ go get github.com/cheggaaa/pb
 $ go get github.com/mattn/go-sqlite3
-$ go install golang-refactoring.org/go-patient/cmd/gopatient-helper-download
-$ go install golang-refactoring.org/go-patient/cmd/gopatient-plan
-$ export PATH=$PATH:$GOPATH/src/golang-refactoring.org/go-patient/cmd:$GOPATH/bin
+$ go install github.com/godoctor/gopatient/cmd/gopatient-helper-download
+$ go install github.com/godoctor/gopatient/cmd/gopatient-plan
+$ export PATH=$PATH:$GOPATH/src/github.com/godoctor/gopatient/cmd:$GOPATH/bin
 
 Note that "export PATH=only changes your PATH until you close your terminal;
 you'll need to run that command again if you open a new terminal.  Or, edit
@@ -157,7 +157,7 @@ Creating a Test Plan
    (-limit 10 will create 10 tests; change this if you want more)
 
    $ cd ~/testcode
-   $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 10 -template $GOPATH/src/golang-refactoring.org/go-patient/templates/null.template
+   $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 10 -template $GOPATH/src/github.com/godoctor/gopatient/templates/null.template
 
    If you get the error
       Error parsing github.com/coreos/etcd/go_version.go:3:1: expected 'package', found 'STRING' "etcd requires go 1.2 or greater to build"

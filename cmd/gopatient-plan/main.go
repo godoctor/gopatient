@@ -1,3 +1,7 @@
+// Copyright 2014 Auburn University. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
@@ -331,8 +335,8 @@ func identFinder(fset *token.FileSet, file *ast.File) []string {
 		case *ast.Ident:
 			fromLine := fset.Position(id.Pos()).Line
 			fromCol := fset.Position(id.Pos()).Column
-			toLine := fset.Position(id.End()-1).Line
-			toCol := fset.Position(id.End()-1).Column
+			toLine := fset.Position(id.End() - 1).Line
+			toCol := fset.Position(id.End() - 1).Column
 			result = append(result, fmt.Sprintf("%d,%d:%d,%d",
 				fromLine, fromCol, toLine, toCol))
 		}
