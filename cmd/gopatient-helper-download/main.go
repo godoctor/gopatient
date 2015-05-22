@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cheggaaa/pb"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/godoctor/gopatient/cmd/gopatient-helper-download/internal/github.com/cheggaaa/pb"
+	_ "github.com/godoctor/gopatient/cmd/gopatient-helper-download/internal/github.com/mattn/go-sqlite3"
 )
 
 var (
