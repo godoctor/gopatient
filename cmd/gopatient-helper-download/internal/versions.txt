@@ -1,0 +1,9 @@
+Thu May 21 21:57:27 CDT 2015
+
+github.com/cheggaaa/pb
+origin	https://github.com/cheggaaa/pb (fetch)
+d7729fd7ec1372c15b83db39834bf842bf2d69fb  (HEAD, origin/master, origin/HEAD, master) return object for a chain calling
+
+github.com/mattn/go-sqlite3
+origin	https://github.com/mattn/go-sqlite3 (fetch)
+542ae647f8601bafd96233961b150cae198e0295  (HEAD, origin/master, origin/HEAD, master) remove -lpthread. related issue #201
