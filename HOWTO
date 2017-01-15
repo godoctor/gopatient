@@ -10,7 +10,7 @@ Setup -- DO THIS BEFORE DOING EITHER OF THE TASKS BELOW
 =============================================================================
 
 Before you can perform any of the tasks below, you'll need to make sure all
-of the commands in the go-patient/cmd directory are available on your PATH.
+of the commands in the gopatient/cmd directory are available on your PATH.
 
 $ go get github.com/cheggaaa/pb
 $ go get github.com/mattn/go-sqlite3
@@ -149,7 +149,7 @@ Creating a Test Plan
 1. Select a Makefile template.
 
    There is an example template file in
-                 /path/to/go-patient/templates/null.template
+                 /path/to/gopatient/templates/null.template
    that you can use directly to test the null refactoring.  Or, you can copy it
    and create your own template.
 

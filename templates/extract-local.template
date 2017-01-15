@@ -1,0 +1,15 @@
+	@echo ""
+	@echo "********** TEST #!NUM! -- !PKG! **********"
+	@echo ""
+	@echo "Installing before refactoring..."
+	go install !PKG!
+	@echo "Refactoring..."
+	godoctor -pos !POS! -file !FILE! var Some_New_Var >patch.txt; \
+	if [ "$$?" -eq 3 ]; then \
+		echo "Precondition failure; continuing with next test"; \
+	else \
+		echo "Applying patch..." && \
+		patch -p0 -i `pwd`/patch.txt && \
+		echo "Installing after refactoring..." && \
+		go install !PKG!; \
+	fi
