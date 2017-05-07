@@ -59,11 +59,11 @@ ones are actually successful.
    the list to "runnable.txt"
 
    $ cd ~/testcode
-   $ GOPATH=~/testcode gopatient-helper-check-runnable >runnable.txt 2>/dev/null
+   $ GOPATH=~/testcode gopatient-helper-check-runnable 2>/dev/null | tee runnable.txt
 
-BE PATIENT.  There will be no output, and this will take several minutes.  In
-another terminal, you can "tail -f ~/testcode/runnable.txt" to see new lines as
-they are added to runnable.txt.
+BE PATIENT.  This will take several minutes, and there may not be output for
+several minutes at a time.  One line will print for each GitHub package that is
+successfully compiled.
 
 Or if you omit "2>/dev/null", you can see all of the errors as it attempts to
 build each project.
@@ -149,15 +149,17 @@ Creating a Test Plan
 1. Select a Makefile template.
 
    There is an example template file in
-                 /path/to/gopatient/templates/null.template
-   that you can use directly to test the null refactoring.  Or, you can copy it
-   and create your own template.
+      $GOPATH/src/github.com/godoctor/gopatient/templates/null.template
+   that you can use directly to test the null refactoring.  The template
+      $GOPATH/src/github.com/godoctor/gopatient/templates/extract-local.template
+   can be used to test the Extract Local Variable refactoring.  You can copy
+   one of these to create your own template.
 
 2. Generate a Makefile from "my.template" for packages in "runnable.txt"
-   (-limit 10 will create 10 tests; change this if you want more)
+   (-limit 100 will create 100 tests; change this if you want more or less)
 
    $ cd ~/testcode
-   $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 10 -template $GOPATH/src/github.com/godoctor/gopatient/templates/null.template
+   $ GOPATH=~/testcode gopatient-plan -pkglist runnable.txt -find files -limit 100 -template $GOPATH/src/github.com/godoctor/gopatient/templates/null.template
 
    If you get the error
       Error parsing github.com/coreos/etcd/go_version.go:3:1: expected 'package', found 'STRING' "etcd requires go 1.2 or greater to build"
